@@ -20,13 +20,15 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK Licenses
+        run: |
+          mkdir -p "$ANDROID_HOME/licenses" || true
+          echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee\nd56f5187479451eabf01fb78af6dfcb131a6481e\n84831b9409646a2416f5717b522045f8b702e26a" > "$ANDROID_HOME/licenses/android-sdk-license"
 
       - name: Download Latest Official FilmCraft Web Build
         run: |
           mkdir -p app/src/main/assets/www
-          WEB_URL=$(curl -s https://api.github.com/repos/storytold/filmcraft/releases | jq -r '[.[].assets[] | select(.name | test("^filmcraft-web-.*\\.zip$"))][0].browser_download_url')
+          WEB_URL=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" https://api.github.com/repos/storytold/filmcraft/releases | jq -r '[.[].assets[] | select(.name | test("^filmcraft-web-.*\\.zip$"))][0].browser_download_url')
           if [ -z "$WEB_URL" ] || [ "$WEB_URL" = "null" ]; then
             WEB_URL="https://github.com/storytold/filmcraft/releases/download/v0.8.0/filmcraft-web-0.8.0.zip"
           fi
